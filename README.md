@@ -1,4 +1,4 @@
-# Project-OOP---Platformer-Game
+# Project OOP - PlatformerGame
 Our Project for OOP at HUST
 
 Note: Update to Java version 14 or higher to execute game
