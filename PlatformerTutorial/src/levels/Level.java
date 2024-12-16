@@ -105,6 +105,9 @@ public class Level {
 		maxLvlOffsetX = Game.TILES_SIZE * maxTilesOffset;
 	}
 
+
+	
+
 	public int getSpriteIndex(int x, int y) {
 		return lvlData[y][x];
 	}

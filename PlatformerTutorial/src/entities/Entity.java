@@ -93,4 +93,7 @@ public abstract class Entity {
 		aniTick = 0;
 		aniIndex = 0;
 	}
+	public boolean isAlive() {
+		return currentHealth > 0;
+	}
 }

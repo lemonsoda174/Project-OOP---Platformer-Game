@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.ArrayList;
 
 import entities.EnemyManager;
+import entities.FlyingSheep;
 import entities.Player;
 import levels.LevelManager;
 import main.Game;
@@ -21,12 +22,19 @@ import ui.PauseOverlay;
 import utilz.LoadSave;
 import effects.DialogueEffect;
 import effects.Rain;
+import entities.Enemy;
+
+
+
+
+import levels.Level;
 
 import static utilz.Constants.Environment.*;
 import static utilz.Constants.Dialogue.*;
 
 public class Playing extends State implements Statemethods {
-
+	//Sheep
+	private FlyingSheep sheep;
 	private Player player;
 	private LevelManager levelManager;
 	private EnemyManager enemyManager;
@@ -40,8 +48,8 @@ public class Playing extends State implements Statemethods {
 	private boolean paused = false;
 
 	private int xLvlOffset;
-	private int leftBorder = (int) (0.25 * Game.GAME_WIDTH);
-	private int rightBorder = (int) (0.75 * Game.GAME_WIDTH);
+	private int leftBorder = (int) (0.40 * Game.GAME_WIDTH);
+	private int rightBorder = (int) (0.60 * Game.GAME_WIDTH);
 	private int maxLvlOffsetX;
 
 	private BufferedImage backgroundImg, bigCloud, smallCloud, shipImgs[];
@@ -56,6 +64,10 @@ public class Playing extends State implements Statemethods {
 	private boolean gameCompleted;
 	private boolean playerDying;
 	private boolean drawRain;
+
+	//Sheep Methods
+
+	
 
 	// Ship will be decided to drawn here. It's just a cool addition to the game
 	// for the first level. Hinting on that the player arrived with the boat.
@@ -143,8 +155,9 @@ public class Playing extends State implements Statemethods {
 		levelManager = new LevelManager(game);
 		enemyManager = new EnemyManager(this);
 		objectManager = new ObjectManager(this);
+		sheep = new FlyingSheep(300, 100, 128, 128); // Initial spawn near player
 
-		player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
+		player = new Player(200, 150, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
 		player.loadLvlData(levelManager.getCurrentLevel().getLevelData());
 		player.setSpawn(levelManager.getCurrentLevel().getPlayerSpawn());
 
@@ -158,6 +171,7 @@ public class Playing extends State implements Statemethods {
 
 	@Override
 	public void update() {
+		
 		if (paused)
 			pauseOverlay.update();
 		else if (lvlCompleted)
@@ -180,6 +194,7 @@ public class Playing extends State implements Statemethods {
 			if (drawShip)
 				updateShipAni();
 		}
+		sheep.update(player, getAllActiveEnemies());
 	}
 
 	private void updateShipAni() {
@@ -243,7 +258,7 @@ public class Playing extends State implements Statemethods {
 	@Override
 	public void draw(Graphics g) {
 		g.drawImage(backgroundImg, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
-
+		
 		drawClouds(g);
 		if (drawRain)
 			rain.draw(g, xLvlOffset);
@@ -254,6 +269,7 @@ public class Playing extends State implements Statemethods {
 		levelManager.draw(g, xLvlOffset);
 		objectManager.draw(g, xLvlOffset);
 		enemyManager.draw(g, xLvlOffset);
+		sheep.render(g, xLvlOffset);
 		player.render(g, xLvlOffset);
 		objectManager.drawBackgroundTrees(g, xLvlOffset);
 		drawDialogue(g, xLvlOffset);
@@ -269,14 +285,15 @@ public class Playing extends State implements Statemethods {
 		else if (gameCompleted)
 			gameCompletedOverlay.draw(g);
 
+
 	}
 
 	private void drawClouds(Graphics g) {
 		for (int i = 0; i < 4; i++)
-			g.drawImage(bigCloud, i * BIG_CLOUD_WIDTH - (int) (xLvlOffset * 0.3), (int) (204 * Game.SCALE), BIG_CLOUD_WIDTH, BIG_CLOUD_HEIGHT, null);
+			g.drawImage(bigCloud, i * BIG_CLOUD_WIDTH - (int) ((xLvlOffset)* 0.3), (int) ((204 * Game.SCALE)+130), BIG_CLOUD_WIDTH, BIG_CLOUD_HEIGHT, null);
 
 		for (int i = 0; i < smallCloudsPos.length; i++)
-			g.drawImage(smallCloud, SMALL_CLOUD_WIDTH * 4 * i - (int) (xLvlOffset * 0.7), smallCloudsPos[i], SMALL_CLOUD_WIDTH, SMALL_CLOUD_HEIGHT, null);
+			g.drawImage(smallCloud, SMALL_CLOUD_WIDTH * 4 * i - (int) (xLvlOffset * 0.7), smallCloudsPos[i]+50, SMALL_CLOUD_WIDTH, SMALL_CLOUD_HEIGHT, null);
 	}
 
 	public void setGameCompleted() {
@@ -300,6 +317,10 @@ public class Playing extends State implements Statemethods {
 		enemyManager.resetAllEnemies();
 		objectManager.resetAllObjects();
 		dialogEffects.clear();
+		
+		
+
+		
 	}
 
 	private void setDrawRainBoolean() {
@@ -328,15 +349,7 @@ public class Playing extends State implements Statemethods {
 		objectManager.checkSpikesTouched(p);
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if (!gameOver) {
-			if (e.getButton() == MouseEvent.BUTTON1)
-				player.setAttacking(true);
-			else if (e.getButton() == MouseEvent.BUTTON3)
-				player.powerAttack();
-		}
-	}
+
 
 	@Override
 	public void keyPressed(KeyEvent e) {
@@ -349,12 +362,26 @@ public class Playing extends State implements Statemethods {
 
 				player.setRight(true);
 				break;
-			case KeyEvent.VK_SPACE:
+			case KeyEvent.VK_W:
 				player.setJump(true);
 				break;
 			case KeyEvent.VK_ESCAPE:
 				paused = !paused;
+			//case KeyEvent.VK_F9:
+			//	setLevelCompleted(true);
+			//	if (levelManager.getLevelIndex() == 4){
+			//		resetAll();;
+			//		levelManager.get
+			//	}
+				
 			}
+		if (!gameOver) {
+			if (e.getKeyCode() == KeyEvent.VK_N)
+				player.setAttacking(true);
+			else if (e.getKeyCode() == KeyEvent.VK_M)
+				player.powerAttack();
+		}
+
 	}
 
 	@Override
@@ -367,10 +394,17 @@ public class Playing extends State implements Statemethods {
 			case KeyEvent.VK_D:
 				player.setRight(false);
 				break;
-			case KeyEvent.VK_SPACE:
+			case KeyEvent.VK_W:
 				player.setJump(false);
 				break;
-			}
+			
+		}
+		if (!gameOver){
+			if (e.getKeyCode() == KeyEvent.VK_N)
+				player.setAttacking(true);
+			else if (e.getKeyCode() == KeyEvent.VK_M)
+				player.powerAttack();
+		}
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -389,6 +423,7 @@ public class Playing extends State implements Statemethods {
 			levelCompletedOverlay.mousePressed(e);
 		else if (gameCompleted)
 			gameCompletedOverlay.mousePressed(e);
+			
 
 	}
 
@@ -421,8 +456,6 @@ public class Playing extends State implements Statemethods {
 		if (levelManager.getLevelIndex() + 1 >= levelManager.getAmountOfLevels()) {
 			// No more levels
 			gameCompleted = true;
-			levelManager.setLevelIndex(0);
-			levelManager.loadNextLevel();
 			resetAll();
 			return;
 		}
@@ -460,4 +493,25 @@ public class Playing extends State implements Statemethods {
 	public void setPlayerDying(boolean playerDying) {
 		this.playerDying = playerDying;
 	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		//throw new UnsupportedOperationException("Unimplemented method 'mouseClicked'");
+	}
+	public ArrayList<Enemy> getAllActiveEnemies() {
+		ArrayList<Enemy> enemies = new ArrayList<>();
+		Level currentLevel = levelManager.getCurrentLevel();
+	    
+		enemies.addAll(currentLevel.getCrabs());
+		enemies.addAll(currentLevel.getPinkstars());
+		enemies.addAll(currentLevel.getSharks());
+	    
+		// Optionally, remove inactive enemies
+		enemies.removeIf(enemy -> !enemy.isActive());
+	    
+		return enemies;
+	    }
+	    
+	  
 }

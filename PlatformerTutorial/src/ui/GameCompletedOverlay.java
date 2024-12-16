@@ -9,12 +9,14 @@ import gamestates.Gamestate;
 import gamestates.Playing;
 import main.Game;
 import utilz.LoadSave;
+//import levels.LevelManager;
 
 public class GameCompletedOverlay {
 	private Playing playing;
 	private BufferedImage img;
-	private MenuButton quit, credit;
+	private MenuButton quit;
 	private int imgX, imgY, imgW, imgH;
+//	private LevelManager levelManager;
 
 	public GameCompletedOverlay(Playing playing) {
 		this.playing = playing;
@@ -24,7 +26,7 @@ public class GameCompletedOverlay {
 
 	private void createButtons() {
 		quit = new MenuButton(Game.GAME_WIDTH / 2, (int) (270 * Game.SCALE), 2, Gamestate.MENU);
-		credit = new MenuButton(Game.GAME_WIDTH / 2, (int) (200 * Game.SCALE), 3, Gamestate.CREDITS);
+
 	}
 
 	private void createImg() {
@@ -42,12 +44,12 @@ public class GameCompletedOverlay {
 
 		g.drawImage(img, imgX, imgY, imgW, imgH, null);
 
-		credit.draw(g);
+
 		quit.draw(g);
 	}
 
 	public void update() {
-		credit.update();
+
 		quit.update();
 	}
 
@@ -56,13 +58,13 @@ public class GameCompletedOverlay {
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		credit.setMouseOver(false);
+	//	credit.setMouseOver(false);
 		quit.setMouseOver(false);
 
 		if (isIn(quit, e))
 			quit.setMouseOver(true);
-		else if (isIn(credit, e))
-			credit.setMouseOver(true);
+	//	else if (isIn(credit, e))
+	//		credit.setMouseOver(true);
 	}
 
 	public void mouseReleased(MouseEvent e) {
@@ -71,23 +73,25 @@ public class GameCompletedOverlay {
 				playing.resetAll();
 				playing.resetGameCompleted();
 				playing.setGamestate(Gamestate.MENU);
+				
 
-			}
-		} else if (isIn(credit, e))
-			if (credit.isMousePressed()) {
-				playing.resetAll();
-				playing.resetGameCompleted();
-				playing.setGamestate(Gamestate.CREDITS);
-			}
+			}}
+		//} else if (isIn(credit, e))
+		//	if (credit.isMousePressed()) {
+		//		playing.resetAll();
+		//		playing.resetGameCompleted();
+				//playing.setGamestate(Gamestate.CREDITS);
+		//	}
 
-		quit.resetBools();
-		credit.resetBools();
+		//quit.resetBools();
+		//credit.resetBools();
 	}
 
 	public void mousePressed(MouseEvent e) {
 		if (isIn(quit, e))
 			quit.setMousePressed(true);
-		else if (isIn(credit, e))
-			credit.setMousePressed(true);
+			
+		//else if (isIn(credit, e))
+			//credit.setMousePressed(true);
 	}
 }
