@@ -336,10 +336,9 @@ public class Playing extends State implements Statemethods {
 		enemyManager.resetAllEnemies();
 		objectManager.resetAllObjects();
 		dialogEffects.clear();
-		if (sheep != null) {
+		if (sheep != null && levelManager.getLevelIndex() >= levelWithSheep) {
 			sheep = new FlyingSheep(500, 300, 128, 128);
-		    }
-		
+		}
 		
 
 		
