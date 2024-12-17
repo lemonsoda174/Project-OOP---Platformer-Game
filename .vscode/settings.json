@@ -1,6 +1,6 @@
 {
         "java.project.sourcePaths": [
-                "PlatformerTutorial/src",
-                "PlatformerTutorial/res"
+                "src",
+                "res"
         ]
 }
