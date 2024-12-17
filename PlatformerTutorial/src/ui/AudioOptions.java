@@ -58,7 +58,7 @@ public class AudioOptions {
 			volumeButton.changeX(e.getX());
 			float valueAfter = volumeButton.getFloatValue();
 			if (valueBefore != valueAfter)
-				game.getAudioPlayer().setVolume(valueAfter);
+				game.getAudioPlayer().setVolume((float) (Math.log(2*valueAfter+2) / Math.log(4)));
 		}
 	}
 
