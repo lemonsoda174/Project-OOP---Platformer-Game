@@ -24,16 +24,13 @@ import effects.DialogueEffect;
 import effects.Rain;
 import entities.Enemy;
 
-
-
-
 import levels.Level;
 
 import static utilz.Constants.Environment.*;
 import static utilz.Constants.Dialogue.*;
 
 public class Playing extends State implements Statemethods {
-	//Sheep
+	// Sheep
 	private FlyingSheep sheep;
 	private Player player;
 	private LevelManager levelManager;
@@ -64,10 +61,8 @@ public class Playing extends State implements Statemethods {
 	private boolean gameCompleted;
 	private boolean playerDying;
 	private boolean drawRain;
+	private int levelWithSheep = 4; // Set the level where sheep should be created
 
-	//Sheep Methods
-
-	
 
 	// Ship will be decided to drawn here. It's just a cool addition to the game
 	// for the first level. Hinting on that the player arrived with the boat.
@@ -140,11 +135,30 @@ public class Playing extends State implements Statemethods {
 		player.setSpawn(levelManager.getCurrentLevel().getPlayerSpawn());
 		resetAll();
 		drawShip = false;
+		// Handle Sheep
+        if (levelManager.getLevelIndex() >= levelWithSheep) {
+			createFlyingSheep();
+        } else {
+			sheep = null; // If Sheep should not exist for this level it is null.
+		}
 	}
+	private void createFlyingSheep(){
+		 if (sheep == null) {
+			sheep = new FlyingSheep(500, 300, 128, 128); // Initial spawn near player
+		}
+	}
+
 
 	private void loadStartLevel() {
 		enemyManager.loadEnemies(levelManager.getCurrentLevel());
 		objectManager.loadObjects(levelManager.getCurrentLevel());
+		//handle sheep on start
+
+        if (levelManager.getLevelIndex() >= levelWithSheep) {
+			createFlyingSheep();
+        }else{
+			sheep = null;
+		}
 	}
 
 	private void calcLvlOffset() {
@@ -155,8 +169,6 @@ public class Playing extends State implements Statemethods {
 		levelManager = new LevelManager(game);
 		enemyManager = new EnemyManager(this);
 		objectManager = new ObjectManager(this);
-		sheep = new FlyingSheep(300, 100, 128, 128); // Initial spawn near player
-
 		player = new Player(200, 150, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
 		player.loadLvlData(levelManager.getCurrentLevel().getLevelData());
 		player.setSpawn(levelManager.getCurrentLevel().getPlayerSpawn());
@@ -193,8 +205,12 @@ public class Playing extends State implements Statemethods {
 			checkCloseToBorder();
 			if (drawShip)
 				updateShipAni();
+			// Update Sheep only when it is initialized.
+			if (sheep != null) {
+				sheep.update(player, getAllActiveEnemies());
+			}
 		}
-		sheep.update(player, getAllActiveEnemies());
+
 	}
 
 	private void updateShipAni() {
@@ -269,7 +285,10 @@ public class Playing extends State implements Statemethods {
 		levelManager.draw(g, xLvlOffset);
 		objectManager.draw(g, xLvlOffset);
 		enemyManager.draw(g, xLvlOffset);
-		sheep.render(g, xLvlOffset);
+		// Draw Sheep only if it exists
+		if (sheep != null) {
+			sheep.render(g, xLvlOffset);
+		}
 		player.render(g, xLvlOffset);
 		objectManager.drawBackgroundTrees(g, xLvlOffset);
 		drawDialogue(g, xLvlOffset);
@@ -317,6 +336,9 @@ public class Playing extends State implements Statemethods {
 		enemyManager.resetAllEnemies();
 		objectManager.resetAllObjects();
 		dialogEffects.clear();
+		if (sheep != null) {
+			sheep = new FlyingSheep(500, 300, 128, 128);
+		    }
 		
 		
 
@@ -351,39 +373,41 @@ public class Playing extends State implements Statemethods {
 
 
 
+
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (!gameOver && !gameCompleted && !lvlCompleted)
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_A:
+	    	if (!gameOver && !gameCompleted && !lvlCompleted) {
+		switch (e.getKeyCode()) {
+		    	case KeyEvent.VK_A:
 				player.setLeft(true);
 				break;
-			case KeyEvent.VK_D:
-
+		    	case KeyEvent.VK_D:
 				player.setRight(true);
 				break;
-			case KeyEvent.VK_W:
+		    	case KeyEvent.VK_W:
 				player.setJump(true);
 				break;
-			case KeyEvent.VK_ESCAPE:
+		    	case KeyEvent.VK_ESCAPE:
 				paused = !paused;
-			//case KeyEvent.VK_F9:
-			//	setLevelCompleted(true);
-			//	if (levelManager.getLevelIndex() == 4){
-			//		resetAll();;
-			//		levelManager.get
-			//	}
-				
-			}
-		if (!gameOver) {
-			if (e.getKeyCode() == KeyEvent.VK_N)
-				player.setAttacking(true);
-			else if (e.getKeyCode() == KeyEvent.VK_M)
-				player.powerAttack();
+				break;
 		}
-
 	}
-
+	    
+	    	if (e.getKeyCode() == KeyEvent.VK_O) {
+		     this.setLevelCompleted(true);
+				if (levelManager.getLevelIndex() == 999){
+					resetAll();
+				}
+	}
+	    
+	
+	    	if (!gameOver) {
+			if (e.getKeyCode() == KeyEvent.VK_N)
+			    player.setAttacking(true);
+			else if (e.getKeyCode() == KeyEvent.VK_M)
+			    player.powerAttack();
+	    }
+	}
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (!gameOver && !gameCompleted && !lvlCompleted)
