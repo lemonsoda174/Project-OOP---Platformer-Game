@@ -30,11 +30,11 @@ public class FlyingSheep extends Entity {
     private Enemy targetEnemy;
 
     // Constants
-    private static final float FIND_ENEMY_RADIUS = 400f;    // Pixels to search for enemies
-    private static final float ATTACK_RANGE = 60f;          // Pixels to attack enemies
-    private static final float FOLLOW_DISTANCE = 50f;       // Pixels to trigger following
+    private static final float FIND_ENEMY_RADIUS = 400f;    
+    private static final float ATTACK_RANGE = 60f;          
+    private static final float FOLLOW_DISTANCE = 50f;      
     private static final float MOVE_SPEED = 0.6f * Game.SCALE;
-    private static final float ATTACK_COOLDOWN = 160;       // Frames (e.g., ~3.33 seconds at 60 FPS)
+    private static final float ATTACK_COOLDOWN = 160;      
     private int attackCooldownTick = 0;
 
     public FlyingSheep(float x, float y, int width, int height) {
@@ -65,23 +65,12 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Update method called every frame to handle animation and behavior.
-     * 
-     * @param player  The player object to follow.
-     * @param enemies The list of active enemies to potentially attack.
-     */
+
     public void update(Player player, ArrayList<Enemy> enemies) {
         handleState(player, enemies);
         handleAnimation();
     }
 
-    /**
-     * Handle the current state behavior.
-     * 
-     * @param player  The player object.
-     * @param enemies The list of active enemies.
-     */
     private void handleState(Player player, ArrayList<Enemy> enemies) {
         switch (currentState) {
             case IDLE:
@@ -124,9 +113,7 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Handle animation frame updates based on time ticks.
-     */
+
     private void handleAnimation() {
         aniTick++;
         if (aniTick >= ANI_SPEED) {
@@ -139,11 +126,7 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Change the current state of the sheep.
-     * 
-     * @param newState The new state to transition into.
-     */
+  
     private void changeState(SheepState newState) {
         if (currentState != newState) {
             currentState = newState;
@@ -152,68 +135,38 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Determine if the player is moving.
-     * 
-     * @param player The player object.
-     * @return True if the player is moving, else False.
-     */
+
     private boolean playerIsMoving(Player player) {
         return player.isLeft() || player.isRight();
     }
 
-    /**
-     * Determine if the player is within a specific distance.
-     * 
-     * @param player   The player object.
-     * @param distance The distance threshold.
-     * @return True if the player is within the distance, else False.
-     */
+ 
     private boolean playerIsWithinDistance(Player player, float distance) {
         float dx = player.getHitbox().x - hitbox.x;
         float dy = player.getHitbox().y - hitbox.y;
         return Math.hypot(dx, dy) < distance;
     }
 
-    /**
-     * Check if the sheep is near the player within a specific distance.
-     * 
-     * @param player   The player object.
-     * @param distance The distance threshold.
-     * @return True if near, else False.
-     */
+
     private boolean isNearPlayer(Player player, float distance) {
         return playerIsWithinDistance(player, distance);
     }
 
-    /**
-     * Follow the player by moving towards their position.
-     * 
-     * @param player The player object.
-     */
+
     private void followPlayer(Player player) {
         float dx = player.getHitbox().x - hitbox.x + 50;
         float dy = player.getHitbox().y - hitbox.y - 100; // Offset above the player
         moveTowards(dx, dy);
     }
 
-    /**
-     * Follow the targeted enemy by moving towards their position.
-     * 
-     * @param enemy The target enemy.
-     */
+ 
     private void followTarget(Enemy enemy) {
         float dx = enemy.getHitbox().x - hitbox.x;
         float dy = enemy.getHitbox().y - hitbox.y;
         moveTowards(dx, dy);
     }
 
-    /**
-     * Move towards a target (player or enemy).
-     * 
-     * @param dx The X offset.
-     * @param dy The Y offset.
-     */
+
     private void moveTowards(float dx, float dy) {
         float distance = (float) Math.hypot(dx, dy);
         if (Math.abs(dx) > 5) {
@@ -230,13 +183,7 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Find the nearest active enemy within a specific range.
-     * 
-     * @param enemies The list of active enemies.
-     * @param range   The range to search within.
-     * @return The nearest enemy if found, else null.
-     */
+
     private Enemy findNearestEnemy(ArrayList<Enemy> enemies, float range) {
         Enemy nearest = null;
         float minDistance = Float.MAX_VALUE;
@@ -252,21 +199,13 @@ public class FlyingSheep extends Entity {
         return nearest;
     }
 
-    /**
-     * Calculate the distance to a target enemy.
-     * 
-     * @param enemy The target enemy.
-     * @return The distance in pixels.
-     */
     private float distanceTo(Enemy enemy) {
         float dx = enemy.getHitbox().x - hitbox.x;
         float dy = enemy.getHitbox().y - hitbox.y;
         return (float) Math.hypot(dx, dy);
     }
 
-    /**
-     * Attack the targeted enemy.
-     */
+
     private void attackEnemy() {
         if (attackCooldownTick > 0) {
             attackCooldownTick--;
@@ -274,27 +213,19 @@ public class FlyingSheep extends Entity {
         }
 
         if (targetEnemy != null && targetEnemy.isActive()) {
-            targetEnemy.hurt(3); // Adjust damage as needed
+            targetEnemy.hurt(7); // Adjust damage as needed
             attackCooldownTick = (int) ATTACK_COOLDOWN;
         }
     }
 
-    /**
-     * Return to the player's position by moving towards them.
-     * 
-     * @param player The player object.
-     */
+
     private void returnToPlayer(Player player) {
         float dx = player.getHitbox().x - hitbox.x;
         float dy = player.getHitbox().y - hitbox.y;
         moveTowards(dx, dy);
     }
 
-    /**
-     * Get the current sprite array based on the state.
-     * 
-     * @return The appropriate sprite array.
-     */
+
     private BufferedImage[] getCurrentSpriteArray() {
         switch (currentState) {
             case IDLE:
@@ -308,12 +239,7 @@ public class FlyingSheep extends Entity {
         }
     }
 
-    /**
-     * Render the FlyingSheep on the screen.
-     * 
-     * @param g          The Graphics object.
-     * @param lvlOffset  The level offset for rendering.
-     */
+
     public void render(Graphics g, int lvlOffset) {
         BufferedImage currentSprite = getCurrentSpriteArray()[aniIndex];
         int drawX = (int) hitbox.x - lvlOffset;
