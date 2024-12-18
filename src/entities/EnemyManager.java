@@ -45,7 +45,7 @@ public class EnemyManager {
 			}
 
 		if (!isAnyActive)
-			playing.setLevelCompleted(true);
+			playing.setLevelCompleted();
 	}
 
 	public void draw(Graphics g, int xLvlOffset) {
