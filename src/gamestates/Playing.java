@@ -59,11 +59,20 @@ public class Playing extends State implements Statemethods {
     // Remove lvlCompleted boolean
     private boolean gameCompleted;
     private boolean playerDying;
+
+   private BufferedImage[] levelStartImage;
+    private boolean showLevelStartImage = false;
+    private int levelStartImageTimer = 0;
+    private final int levelStartImageDuration = 5 * 60;  // 5 seconds at 60 FPS
+    private boolean firstLevel = false;
+    private int levelStartImageIndex; // Track the current level start image.
+
+
     private boolean drawRain;
-	private int levelWithSheep = 4; 
-	private int lvlbackground1 = 4;
-	private int lvlbackground2 = 9;
-	private int lvlbackground3 = 14;
+    private int levelWithSheep = 4;
+    private int lvlbackground1 = 4;
+    private int lvlbackground2 = 9;
+    private int lvlbackground3 = 14;
 
     // Ship will be decided to drawn here. It's just a cool addition to the game
     // for the first level. Hinting on that the player arrived with the boat.
@@ -95,6 +104,9 @@ public class Playing extends State implements Statemethods {
         backgroundImg3 = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG3);
         bigCloud = LoadSave.GetSpriteAtlas(LoadSave.BIG_CLOUDS);
         smallCloud = LoadSave.GetSpriteAtlas(LoadSave.SMALL_CLOUDS);
+         loadLevelStartImages(); // Load all the level images.
+
+
         smallCloudsPos = new int[8];
         for (int i = 0; i < smallCloudsPos.length; i++)
             smallCloudsPos[i] = (int) (90 * Game.SCALE) + rnd.nextInt((int) (100 * Game.SCALE));
@@ -108,6 +120,24 @@ public class Playing extends State implements Statemethods {
         calcLvlOffset();
         loadStartLevel();
         setDrawRainBoolean();
+    }
+     private void loadLevelStartImages(){
+        levelStartImage = new BufferedImage[15];
+        levelStartImage[0] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL1);
+        levelStartImage[1] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL2);
+        levelStartImage[2] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL3);
+         levelStartImage[3] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL4);
+         levelStartImage[4] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL5);
+         levelStartImage[5] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL6);
+         levelStartImage[6] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL7);
+         levelStartImage[7] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL8);
+         levelStartImage[8] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL9);
+         levelStartImage[9] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL10);
+         levelStartImage[10] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL11);
+         levelStartImage[11] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL12);
+         levelStartImage[12] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL13);
+         levelStartImage[13] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL14);
+         levelStartImage[14] = LoadSave.GetSpriteAtlas(LoadSave.LEVEL15);
     }
 
     private void loadDialogue() {
@@ -145,6 +175,12 @@ public class Playing extends State implements Statemethods {
         player.setSpawn(levelManager.getCurrentLevel().getPlayerSpawn());
         resetAll();
         drawShip = false;
+		if(levelManager.getLevelIndex() < levelStartImage.length && !firstLevel){
+			showLevelStartImage = true; // only show on level 1 start
+            levelStartImageIndex = levelManager.getLevelIndex();
+			firstLevel = true;
+		}
+
         // Handle Sheep
         if (levelManager.getLevelIndex() >= levelWithSheep) {
 			createFlyingSheep();
@@ -161,6 +197,11 @@ public class Playing extends State implements Statemethods {
     private void loadStartLevel() {
         enemyManager.loadEnemies(levelManager.getCurrentLevel());
         objectManager.loadObjects(levelManager.getCurrentLevel());
+		if (levelManager.getLevelIndex() < levelStartImage.length && !firstLevel){
+			showLevelStartImage = true;
+            levelStartImageIndex = levelManager.getLevelIndex();
+			firstLevel = true;
+		}
         //handle sheep on start
 
         if (levelManager.getLevelIndex() >= levelWithSheep) {
@@ -218,6 +259,13 @@ public class Playing extends State implements Statemethods {
             if (sheep != null) {
                 sheep.update(player, getAllActiveEnemies());
             }
+			if (showLevelStartImage) { // Timer for level start image
+				levelStartImageTimer++;
+				if (levelStartImageTimer >= levelStartImageDuration) {
+					showLevelStartImage = false;
+					levelStartImageTimer = 0;
+				}
+			}
         }
 
     }
@@ -313,14 +361,17 @@ public class Playing extends State implements Statemethods {
         levelManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset);
-        // Draw Sheep only if it exists
+         // Draw Sheep only if it exists
         if (sheep != null) {
             sheep.render(g, xLvlOffset);
         }
         player.render(g, xLvlOffset);
         objectManager.drawBackgroundTrees(g, xLvlOffset);
         drawDialogue(g, xLvlOffset);
-
+		// Draw level start image
+		if (showLevelStartImage && levelStartImageIndex < levelStartImage.length) {
+			drawLevelStartImage(g);
+		}
         if (paused) {
             g.setColor(new Color(0, 0, 0, 150));
             g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
@@ -334,6 +385,53 @@ public class Playing extends State implements Statemethods {
         if (levelTransitioning) {
             drawFadeEffect(g);
         }
+    }
+   private void drawLevelStartImage(Graphics g) {
+       if (!showLevelStartImage || levelStartImageIndex >= levelStartImage.length || levelStartImage[levelStartImageIndex] == null)
+           return;
+        BufferedImage currentImage = levelStartImage[levelStartImageIndex];
+        int imgWidth = currentImage.getWidth();
+        int imgHeight = currentImage.getHeight();
+
+
+        // Calculate scaling
+        float scaleFactor = 0.25f;
+        float maxScaleFactor = 0.75f; // Maximum scale factor we want to reach
+
+        if (levelStartImageTimer < levelStartImageDuration / 2) {
+            scaleFactor = 0.25f + (float) levelStartImageTimer / (float) (levelStartImageDuration/2) * (maxScaleFactor - 0.25f); // Scale up initially
+            scaleFactor = Math.min(scaleFactor,maxScaleFactor); // Ensure scale does not pass the max scale
+        }else{
+            scaleFactor = maxScaleFactor - (float) (levelStartImageTimer - (levelStartImageDuration / 2)) / (float) (levelStartImageDuration/2) * (maxScaleFactor-0.25f); // Scale down
+            scaleFactor = Math.max(scaleFactor,0.25f); // Ensure scale is not less than 0.25
+        }
+
+        int scaledWidth = (int) (imgWidth * scaleFactor);
+        int scaledHeight = (int) (imgHeight * scaleFactor);
+
+
+        int x = (Game.GAME_WIDTH - scaledWidth) / 2;
+        int y = (Game.GAME_HEIGHT - scaledHeight) / 2;
+
+
+        // Calculate fade alpha value
+        float alpha = 1.0f;
+        if (levelStartImageTimer < levelStartImageDuration / 4) {
+            alpha = (float) levelStartImageTimer / (float) (levelStartImageDuration / 4); // Fade in
+        }else if(levelStartImageTimer >= (levelStartImageDuration * 3)/ 4){
+            alpha = 1f - (float)(levelStartImageTimer - (levelStartImageDuration * 3)/ 4) / (float)(levelStartImageDuration / 4); //Fade out
+            alpha = Math.max(alpha,0);
+        }
+
+
+        // Apply the alpha to the Graphics object.
+        java.awt.AlphaComposite alphaComposite = java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, alpha);
+        ((java.awt.Graphics2D)g).setComposite(alphaComposite);
+
+
+        g.drawImage(currentImage, x, y, scaledWidth, scaledHeight, null);
+
+        ((java.awt.Graphics2D)g).setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, 1f)); // Reset the alpha composite
     }
      private void drawFadeEffect(Graphics g) {
         g.setColor(new Color(0, 0, 0, Math.min(1f, fadeAlpha)));
@@ -362,6 +460,8 @@ public class Playing extends State implements Statemethods {
         paused = false;
         // lvlCompleted = false; Remove lvlCompleted
         playerDying = false;
+		showLevelStartImage = false;
+		firstLevel = false;
         drawRain = false;
         fadeAlpha = 0; //Reset fade alpha
         levelTransitioning = false; // reset fade boolean
