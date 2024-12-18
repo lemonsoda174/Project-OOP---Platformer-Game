@@ -49,7 +49,7 @@ public class Playing extends State implements Statemethods {
 	private int rightBorder = (int) (0.60 * Game.GAME_WIDTH);
 	private int maxLvlOffsetX;
 
-	private BufferedImage backgroundImg, bigCloud, smallCloud, shipImgs[];
+	private BufferedImage backgroundImg, backgroundImg2, backgroundImg3, bigCloud, smallCloud, shipImgs[];
 	private BufferedImage[] questionImgs, exclamationImgs;
 	private ArrayList<DialogueEffect> dialogEffects = new ArrayList<>();
 
@@ -61,7 +61,10 @@ public class Playing extends State implements Statemethods {
 	private boolean gameCompleted;
 	private boolean playerDying;
 	private boolean drawRain;
-	private int levelWithSheep = 4; // Set the level where sheep should be created
+	private int levelWithSheep = 4; 
+	private int lvlbackground1 = 4;
+	private int lvlbackground2 = 9;
+	private int lvlbackground3 = 14;
 
 
 	// Ship will be decided to drawn here. It's just a cool addition to the game
@@ -83,6 +86,8 @@ public class Playing extends State implements Statemethods {
 		initClasses();
 
 		backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG);
+		backgroundImg2 = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG2);
+		backgroundImg3 = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG3);
 		bigCloud = LoadSave.GetSpriteAtlas(LoadSave.BIG_CLOUDS);
 		smallCloud = LoadSave.GetSpriteAtlas(LoadSave.SMALL_CLOUDS);
 		smallCloudsPos = new int[8];
@@ -273,8 +278,15 @@ public class Playing extends State implements Statemethods {
 
 	@Override
 	public void draw(Graphics g) {
-		g.drawImage(backgroundImg, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
-		
+		if(levelManager.getLevelIndex() <= lvlbackground1) {
+			g.drawImage(backgroundImg, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+		}
+		else if(levelManager.getLevelIndex() <= lvlbackground2 && levelManager.getLevelIndex() > lvlbackground1) {
+			g.drawImage(backgroundImg2, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+		}
+		else if(levelManager.getLevelIndex() <= lvlbackground3 && levelManager.getLevelIndex() > lvlbackground2) {
+			g.drawImage(backgroundImg3, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+		}
 		drawClouds(g);
 		if (drawRain)
 			rain.draw(g, xLvlOffset);
