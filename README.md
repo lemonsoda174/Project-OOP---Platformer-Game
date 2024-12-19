@@ -4,9 +4,7 @@ Our Project for OOP at HUST
 
 Note: Update to Java version 14 or higher to execute game
 
-Start game by running src/main/Game.java
-
-Edit GameScreen size by SCALE = Xf; by default, X = 2
+Start game by running mainClass
 
 # Start menu
 ![Start menu](image.png)
@@ -14,4 +12,4 @@ Edit GameScreen size by SCALE = Xf; by default, X = 2
 
 # Gameplay
 ![Gameplay](GameplayImage.png)
-)
+
